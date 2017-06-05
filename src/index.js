@@ -185,7 +185,11 @@ class Cryptex {
     if (module.indexOf(path.sep) >= 0) {
       throw new UserError(`Invalid module name: "${module}"`)
     }
-    const reqPath = path.join(__dirname, dir, module)
+    let reqPath = path.join(__dirname, dir, module)
+    if (process.env.LAMBDA_TASK_ROOT && process.env.AWS_LAMBDA_FUNCTION_NAME) {
+      const prefix = process.env._HANDLER.split('/')[0]
+      reqPath = path.resolve(process.env.LAMBDA_TASK_ROOT, prefix, process.env.AWS_LAMBDA_FUNCTION_NAME, 'node_modules/cryptex/src', dir, module)
+    }
     if (!Cryptex._requires[reqPath]) {
       Cryptex._requires[reqPath] = require(reqPath)
     }
