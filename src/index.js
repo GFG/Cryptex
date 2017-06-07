@@ -11,10 +11,6 @@ const UserError = require('./lib/UserError')
 const defaultFilename = 'cryptex.json'
 const defaultEnv = 'default'
 
-const aes256 = require('./algorithms/aes256')
-const binaryEncoding = require('./encodings/binary')
-const kmsKeySource = require('./keySources/kms')
-
 class Cryptex {
 
   /**
@@ -135,8 +131,7 @@ class Cryptex {
 
   _getAlgo() {
     if (!this._algoInst) {
-      // const AlgoClass = Cryptex._require(this._config.dirname, 'algorithms', this._config.algorithm)
-      const AlgoClass = aes256
+      const AlgoClass = Cryptex._require(this._config.dirname, 'algorithms', this._config.algorithm)
       this._algoInst = new AlgoClass(this._config.algorithmOpts)
     }
     return this._algoInst
@@ -149,10 +144,8 @@ class Cryptex {
     if (!this._config.keySource) {
       return Promise.reject(new UserError('KeySource not found. Is Cryptex properly configured?'))
     }
-    // const sourceGetKey = Cryptex._require(this._config.dirname, 'keySources', this._config.keySource)
-    const sourceGetKey = kmsKeySource
-    // const toBuffer = Cryptex._require(this._config.dirname, 'encodings', this._config.keySourceEncoding)
-    const toBuffer = binaryEncoding
+    const sourceGetKey = Cryptex._require(this._config.dirname, 'keySources', this._config.keySource)
+    const toBuffer = Cryptex._require(this._config.dirname, 'encodings', this._config.keySourceEncoding)
     return sourceGetKey(this._config.keySourceOpts).then((keyData) => {
       if (keyData && !Buffer.isBuffer(keyData) && this._config.keySourceEncoding === 'binary') {
         throw new UserError("Please specify a key encoding. Looks like it's not a binary buffer!")
